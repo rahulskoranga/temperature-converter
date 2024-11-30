@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Temperature Converter</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      line-height: 1.6;
+    }
+    .converter-container {
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+      width: 100%;
+      max-width: 450px;
+    }
+    .input-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 600;
+    }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 16px;
+      transition: border-color 0.3s ease;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: #4a90e2;
+    }
+    .convert-button {
+      background-color: #4a90e2;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+      width: 100%;
+    }
+    .convert-button:hover {
+      background-color: #357abD;
+    }
+    #conversionResult {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f9f9f9;
+      border-radius: 6px;
+      text-align: center;
+    }
+    .error-message {
+      color: #d9534f;
+      margin-top: 10px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="converter-container">
+    <h2>Temperature Converter</h2>
+    
+    <div class="input-group">
+      <label for="temperatureInput">Enter Temperature Value:</label>
+      <input 
+        type="number" 
+        id="temperatureInput" 
+        placeholder="Type temperature here" 
+        step="0.01"
+      >
+    </div>
+    
+    <div class="input-group">
+      <label for="unitSelector">Convert From:</label>
+      <select id="unitSelector">
+        <option value="C">Celsius (°C)</option>
+        <option value="F">Fahrenheit (°F)</option>
+        <option value="K">Kelvin (K)</option>
+      </select>
+    </div>
+    
+    <button id="convertButton" class="convert-button">
+      Convert Temperatures
+    </button>
+    
+    <div id="errorMessage" class="error-message"></div>
+    <div id="conversionResult"></div>
+  </div>
+
+  <script>
+    function convertTemperature(inputValue, inputUnit) {
+      if (isNaN(inputValue) || inputValue === null) {
+        throw new Error("Please enter a valid numeric temperature.");
+      }
+
+      const conversions = {
+        fromCelsius: (temp) => ({
+          celsius: temp,
+          fahrenheit: (temp * 9/5) + 32,
+          kelvin: temp + 273.15
+        }),
+        fromFahrenheit: (temp) => {
+          const celsius = (temp - 32) * 5/9;
+          return {
+            celsius: celsius,
+            fahrenheit: temp,
+            kelvin: celsius + 273.15
+          };
+        },
+        fromKelvin: (temp) => {
+          const celsius = temp - 273.15;
+          return {
+            celsius: celsius,
+            fahrenheit: (celsius * 9/5) + 32,
+            kelvin: temp
+          };
+        }
+      };
+
+      const conversionMap = {
+        'C': conversions.fromCelsius,
+        'F': conversions.fromFahrenheit,
+        'K': conversions.fromKelvin
+      };
+
+      const conversionFunction = conversionMap[inputUnit];
+      if (!conversionFunction) {
+        throw new Error("Invalid temperature unit selected.");
+      }
+
+      return conversionFunction(parseFloat(inputValue));
+    }
+
+    document.getElementById('convertButton').addEventListener('click', function() {
+      const temperatureInput = document.getElementById('temperatureInput');
+      const unitSelector = document.getElementById('unitSelector');
+      const errorMessageDiv = document.getElementById('errorMessage');
+      const conversionResultDiv = document.getElementById('conversionResult');
+
+      errorMessageDiv.textContent = '';
+      conversionResultDiv.innerHTML = '';
+
+      try {
+        const result = convertTemperature(
+          temperatureInput.value, 
+          unitSelector.value
+        );
+
+        conversionResultDiv.innerHTML = `
+          <h3>Conversion Results:</h3>
+          <p>${result.celsius.toFixed(2)} °C</p>
+          <p>${result.fahrenheit.toFixed(2)} °F</p>
+          <p>${result.kelvin.toFixed(2)} K</p>
+        `;
+      } catch (error) {
+        errorMessageDiv.textContent = error.message;
+      }
+    });
+  </script>
+</body>
+</html>
